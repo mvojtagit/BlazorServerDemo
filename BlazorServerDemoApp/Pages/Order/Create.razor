@@ -1,0 +1,71 @@
+﻿@page "/Create"
+@inject IFoodData foodData
+@inject IOrderData orderData
+@inject NavigationManager navMan
+
+
+<h3>CreateOrder</h3>
+
+
+<EditForm Model="@_order" OnValidSubmit="HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary Model="@_order" />
+    <div class="form-group">
+        <label class="control-label">Item to Order</label>
+        <select @onchange="FoodItemChange" class="form-control">
+            <option value="">Select a meal...</option>
+            @foreach (var item in _foodItems)
+            {
+                <option value="@item.Id">@item.Title</option>
+            }
+        </select>
+    </div>
+    <div class="form-group">
+        <label class="control-label">Quantity</label>
+        <InputNumber @bind-Value="@_order.Quantity" class="form-control" />
+        <ValidationMessage For="@(()=>_order.Quantity)" class="text-danger" />
+    </div>
+    <div class="form-group">
+        <label class="control-label">Order Name</label>
+        <InputText @bind-Value="@_order.OrderName" class="form-control" />
+        <ValidationMessage For="@(()=>_order.OrderName)" class="text-danger" />
+    </div>
+    <div class="form-group">
+        <input class="btn btn-primary" type="submit" value="Order Food"/>
+    </div>
+</EditForm>
+
+
+@code {
+
+    private OrderModel _order = new OrderModel();
+    private List<FoodModel> _foodItems = new List<FoodModel>();
+
+    protected override async Task OnParametersSetAsync()
+    {
+        _foodItems = await foodData.GetFood();
+    }
+
+    private async Task HandleValidSubmit()
+    {
+
+        _order.Total = _order.Quantity * _foodItems.Where(x => x.Id == _order.FoodId).First().Price;
+        var i = await orderData.CreateOrder(_order);
+
+        _order = new OrderModel();
+
+        navMan.NavigateTo($"/order/display/{i}");
+    }
+
+    private void FoodItemChange(ChangeEventArgs e)
+    {
+        if (!string.IsNullOrWhiteSpace(e.Value.ToString()))
+        {
+            _order.FoodId = int.Parse(e.Value.ToString());
+        }
+        else
+        {
+            _order.FoodId = 0;
+        }
+    }
+}

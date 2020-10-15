@@ -1,0 +1,50 @@
+﻿@page "/Order/List"
+@inject IOrderData orderData
+@inject NavigationManager navMan
+<h3>List of Orders</h3>
+
+@if (oredrList is null)
+{
+    <h4>Loading Data</h4>
+}
+else
+{
+    <table class="table table-striped">
+        <thead class="thead-dark">
+            <tr>
+               
+                <td>FoodTitle</td>
+                <td>OrderName</td>
+                <td>Quantity</td>
+                <td>Total</td>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in oredrList)
+            {
+            <tr @onclick="(()=> GetById(item.Id) )">
+                <td>@item.FoodTitle</td>
+                <td>@item.OrderName</td>
+                <td>@item.Quantity</td>
+                <td>@string.Format("{0:C}", item.Total)</td>
+            </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+
+    private List<OrderModel> oredrList = new List<OrderModel>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        oredrList = await orderData.GetAll();
+    }
+
+    private void GetById(int Id)
+    {
+        navMan.NavigateTo($"/Order/Display/{Id.ToString()}");
+    }
+
+}

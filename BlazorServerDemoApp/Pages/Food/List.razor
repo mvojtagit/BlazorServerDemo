@@ -1,0 +1,45 @@
+﻿@page "/Food/List"
+@inject IFoodData foodData
+
+<h3>List</h3>
+
+@if (food is null)
+{
+    <h4>Loading ....</h4>
+}
+else
+{
+    <table class="table table-striped">
+        <thead class="thead-dark">
+            <tr>
+                <td>Id</td>
+                <td>Title</td>
+                <td>Description</td>
+                <td>Price</td>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in food)
+            {
+                <tr>
+                    <td>@item.Id</td>
+                    <td>@item.Title</td>
+                    <td>@item.Description</td>
+                    <td>@string.Format("{0:C}", item.Price)</td>
+                </tr>
+            }
+        </tbody>
+
+    </table>
+}
+
+@code {
+
+    private List<FoodModel> food = new List<FoodModel>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        food = await foodData.GetFood();
+    }
+}
+
